@@ -11,6 +11,7 @@ import {
 } from "../../features/notes/notesSlice";
 import BlockEditor from "./BlockEditor";
 import { useBeforeUnloadGuard } from "../../hooks/useBeforeUnloadGuard";
+import SaveIndicator from "./SaveIndicator";
 
 export default function NoteEditor() {
   const dispatch = useDispatch();
@@ -65,32 +66,16 @@ export default function NoteEditor() {
      Render
   ============================ */
 
-  return (
-    <div className="flex-1 flex flex-col bg-gray-50">
-      {/* Top Status Bar */}
-      <div className="p-4 border-b bg-white flex justify-between items-center">
-        <span className="text-sm font-medium">
-          Status:{" "}
-          <span
-            className={`ml-1 ${
-              saveStatus.state === "saving"
-                ? "text-yellow-500"
-                : saveStatus.state === "saved"
-                ? "text-green-600"
-                : saveStatus.state === "error"
-                ? "text-red-600"
-                : saveStatus.state === "conflict"
-                ? "text-orange-600"
-                : "text-gray-500"
-            }`}
-          >
-            {saveStatus.state}
-          </span>
-        </span>
-      </div>
+ return (
+  <div className="flex-1 flex flex-col bg-gray-100">
+    {/* Top Status Bar */}
+    <div className="px-8 py-4 bg-white border-b flex justify-end">
+      <SaveIndicator />
+    </div>
 
-      {/* Block Editor Area */}
-      <div className="flex-1 overflow-y-auto p-8 space-y-2 bg-white">
+    {/* Block Editor Area */}
+    <div className="flex-1 overflow-y-auto">
+      <div className="max-w-3xl mx-auto px-10 py-10 space-y-3">
         {localBlocks.map((block) => (
           <BlockEditor
             key={block.id}
@@ -131,5 +116,7 @@ export default function NoteEditor() {
         ))}
       </div>
     </div>
-  );
+  </div>
+);
+
 }
