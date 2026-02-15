@@ -1,0 +1,24 @@
+datasource db {
+  provider = "sqlite"
+  url      = "file:./dev.db"
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model Note {
+  id        String   @id @default(uuid())
+  title     String
+  content   String
+  version   Int
+  updatedAt DateTime @updatedAt
+}
+
+model Revision {
+  id        String   @id @default(uuid())
+  noteId    String
+  content   String
+  version   Int
+  createdAt DateTime @default(now())
+}
