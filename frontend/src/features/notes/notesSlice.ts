@@ -1,6 +1,7 @@
 import { createSlice } from "@reduxjs/toolkit";
 import type { PayloadAction } from "@reduxjs/toolkit";
 import { SearchIndex } from "./searchIndex";
+import type { Block, BlockType } from "./types";
 
 /* ============================
    Types
@@ -9,7 +10,7 @@ import { SearchIndex } from "./searchIndex";
 export interface Note {
   id: string;
   title: string;
-  content: string;
+  blocks: Block[];
   version: number;
   updatedAt: string;
   updatedBy: string;
@@ -21,38 +22,36 @@ export interface SaveStatus {
 }
 
 interface ConflictData {
-  localContent: string;
-  remoteContent: string;
+  localBlocks: Block[];
+  remoteBlocks: Block[];
   remoteVersion: number;
-}
-
-interface NotesState {
-  notes: Record<string, Note>;
-  activeNoteId: string | null;
-  localContent: string;
-  saveStatus: SaveStatus;
-
-  // request sequencing safety
-  requestSequence: number;
-  lastCommittedSequence: number;
-
-  // conflict state
-  conflictData?: ConflictData;
-
-  // search
-  searchQuery: string;
-
-  revisions: Record<string, Revision[]>;
 }
 
 interface Revision {
   id: string;
   noteId: string;
-  content: string;
+  blocks: Block[];
   version: number;
   editedAt: string;
 }
 
+interface NotesState {
+  notes: Record<string, Note>;
+  activeNoteId: string | null;
+  localBlocks: Block[];
+  saveStatus: SaveStatus;
+
+  requestSequence: number;
+  lastCommittedSequence: number;
+
+  conflictData?: ConflictData;
+
+  searchQuery: string;
+
+  revisions: Record<string, Revision[]>;
+  lastCreatedBlockId?: string;
+
+}
 
 /* ============================
    Search Index Instance
@@ -67,13 +66,23 @@ const searchIndex = new SearchIndex();
 const initialState: NotesState = {
   notes: {},
   activeNoteId: null,
-  localContent: "",
+  localBlocks: [],
   saveStatus: { state: "idle" },
   requestSequence: 0,
   lastCommittedSequence: 0,
   searchQuery: "",
-  revisions:{},
+  revisions: {},
+  lastCreatedBlockId: undefined,
+
 };
+
+/* ============================
+   Helper
+============================ */
+
+function flattenBlocks(blocks: Block[]) {
+  return blocks.map((b) => b.content).join(" ");
+}
 
 /* ============================
    Slice
@@ -93,15 +102,22 @@ const notesSlice = createSlice({
       const newNote: Note = {
         id,
         title: "Untitled Note",
-        content: "",
+        blocks: [
+          {
+            id: crypto.randomUUID(),
+            type: "paragraph",
+            content: "",
+          },
+        ],
         version: 1,
         updatedAt: now,
         updatedBy: "You",
       };
 
       state.notes[id] = newNote;
+      state.revisions[id] = [];
       state.activeNoteId = id;
-      state.localContent = "";
+      state.localBlocks = newNote.blocks.map((b) => ({ ...b }));
 
       searchIndex.addNote(id, "");
     },
@@ -114,10 +130,11 @@ const notesSlice = createSlice({
 
       searchIndex.removeNote(id);
       delete state.notes[id];
+      delete state.revisions[id];
 
       if (state.activeNoteId === id) {
         state.activeNoteId = null;
-        state.localContent = "";
+        state.localBlocks = [];
         state.saveStatus = { state: "idle" };
       }
     },
@@ -133,14 +150,12 @@ const notesSlice = createSlice({
       const note = state.notes[id];
       if (!note) return;
 
-      // remove old index entries
       searchIndex.removeNote(id);
 
       note.title = title;
       note.updatedAt = new Date().toISOString();
 
-      // reindex
-      searchIndex.addNote(id, title + " " + note.content);
+      searchIndex.addNote(id, title + " " + flattenBlocks(note.blocks));
 
       if (state.activeNoteId === id) {
         state.saveStatus = { state: "unsaved" };
@@ -153,18 +168,50 @@ const notesSlice = createSlice({
     setActiveNote(state, action: PayloadAction<string>) {
       const id = action.payload;
       state.activeNoteId = id;
-      state.localContent = state.notes[id]?.content || "";
+      state.localBlocks =
+        state.notes[id]?.blocks.map((b) => ({ ...b })) || [];
       state.saveStatus = { state: "idle" };
       state.conflictData = undefined;
     },
 
     /* ======================
-       Update Local Content
+       Block Editing
     ====================== */
-    updateLocalContent(state, action: PayloadAction<string>) {
-      state.localContent = action.payload;
+    updateBlock(
+      state,
+      action: PayloadAction<{ blockId: string; content: string }>
+    ) {
+      const block = state.localBlocks.find(
+        (b) => b.id === action.payload.blockId
+      );
+      if (!block) return;
+
+      block.content = action.payload.content;
       state.saveStatus = { state: "unsaved" };
     },
+
+    addBlock(
+        state,
+        action: PayloadAction<{ afterId: string; type?: BlockType }>
+        ) {
+        const index = state.localBlocks.findIndex(
+            (b) => b.id === action.payload.afterId
+        );
+
+        if (index === -1) return;
+
+        const newBlock = {
+            id: crypto.randomUUID(),
+            type: action.payload.type || "paragraph",
+            content: "",
+        };
+
+        state.localBlocks.splice(index + 1, 0, newBlock);
+
+        state.lastCreatedBlockId = newBlock.id;
+        state.saveStatus = { state: "unsaved" };
+        },
+
 
     /* ======================
        Saving Lifecycle
@@ -177,55 +224,46 @@ const notesSlice = createSlice({
     saveSuccess(
       state,
       action: PayloadAction<{
-        content: string;
         version: number;
         seq: number;
       }>
     ) {
-      const { content, version, seq } = action.payload;
+      const { version, seq } = action.payload;
 
-      // stale response protection
       if (seq < state.lastCommittedSequence) return;
-
       state.lastCommittedSequence = seq;
 
       if (!state.activeNoteId) return;
       const note = state.notes[state.activeNoteId];
       if (!note) return;
 
-      // remove old index entries
       searchIndex.removeNote(note.id);
 
-      note.content = content;
+      note.blocks = state.localBlocks.map((b) => ({ ...b }));
       note.version = version;
       note.updatedAt = new Date().toISOString();
 
-      // reindex with new content
       searchIndex.addNote(
         note.id,
-        note.title + " " + content
+        note.title + " " + flattenBlocks(note.blocks)
       );
-      if (!state.revisions[note.id]) {
-  state.revisions[note.id] = [];
-}
 
-const revisions = state.revisions[note.id] || [];
-const lastRevision = revisions[revisions.length - 1];
+      const revisions = state.revisions[note.id] || [];
+      const lastRevision = revisions[revisions.length - 1];
 
-if (!lastRevision || lastRevision.content !== content) {
-  if (!state.revisions[note.id]) {
-    state.revisions[note.id] = [];
-  }
-
-  state.revisions[note.id].push({
-    id: crypto.randomUUID(),
-    noteId: note.id,
-    content,
-    version,
-    editedAt: new Date().toISOString(),
-  });
-}
-
+      if (
+        !lastRevision ||
+        JSON.stringify(lastRevision.blocks) !==
+          JSON.stringify(note.blocks)
+      ) {
+        state.revisions[note.id].push({
+          id: crypto.randomUUID(),
+          noteId: note.id,
+          blocks: note.blocks.map((b) => ({ ...b })),
+          version,
+          editedAt: new Date().toISOString(),
+        });
+      }
 
       state.saveStatus = { state: "saved" };
     },
@@ -243,22 +281,23 @@ if (!lastRevision || lastRevision.content !== content) {
     setConflict(
       state,
       action: PayloadAction<{
-        remoteContent: string;
+        remoteBlocks: Block[];
         remoteVersion: number;
       }>
     ) {
       state.saveStatus = { state: "conflict" };
       state.conflictData = {
-        localContent: state.localContent,
-        remoteContent: action.payload.remoteContent,
+        localBlocks: state.localBlocks.map((b) => ({ ...b })),
+        remoteBlocks: action.payload.remoteBlocks,
         remoteVersion: action.payload.remoteVersion,
       };
     },
 
     resolveConflictWithLocal(state) {
-      if (!state.activeNoteId || !state.conflictData) return;
-
-      state.localContent = state.conflictData.localContent;
+      if (!state.conflictData) return;
+      state.localBlocks = state.conflictData.localBlocks.map((b) => ({
+        ...b,
+      }));
       state.saveStatus = { state: "unsaved" };
       state.conflictData = undefined;
     },
@@ -270,15 +309,18 @@ if (!lastRevision || lastRevision.content !== content) {
 
       searchIndex.removeNote(note.id);
 
-      note.content = state.conflictData.remoteContent;
+      note.blocks = state.conflictData.remoteBlocks.map((b) => ({
+        ...b,
+      }));
       note.version = state.conflictData.remoteVersion;
+
+      state.localBlocks = note.blocks.map((b) => ({ ...b }));
 
       searchIndex.addNote(
         note.id,
-        note.title + " " + note.content
+        note.title + " " + flattenBlocks(note.blocks)
       );
 
-      state.localContent = note.content;
       state.saveStatus = { state: "saved" };
       state.conflictData = undefined;
     },
@@ -289,6 +331,37 @@ if (!lastRevision || lastRevision.content !== content) {
     setSearchQuery(state, action: PayloadAction<string>) {
       state.searchQuery = action.payload;
     },
+    changeBlockType(
+  state,
+  action: PayloadAction<{ blockId: string; type: BlockType }>
+) {
+  const block = state.localBlocks.find(
+    (b) => b.id === action.payload.blockId
+  );
+  if (!block) return;
+
+  block.type = action.payload.type;
+  block.content = ""; // reset slash content
+  state.saveStatus = { state: "unsaved" };
+},
+toggleCheckbox(
+  state,
+  action: PayloadAction<{ blockId: string }>
+) {
+  const block = state.localBlocks.find(
+    (b) => b.id === action.payload.blockId
+  );
+  if (!block) return;
+
+  block.checked = !block.checked;
+  state.saveStatus = { state: "unsaved" };
+},
+clearLastCreatedBlock(state) {
+  state.lastCreatedBlockId = undefined;
+},
+
+
+
   },
 });
 
@@ -301,7 +374,8 @@ export const {
   deleteNote,
   renameNote,
   setActiveNote,
-  updateLocalContent,
+  updateBlock,
+  addBlock,
   startSaving,
   saveSuccess,
   saveError,
@@ -309,12 +383,11 @@ export const {
   resolveConflictWithLocal,
   resolveConflictWithRemote,
   setSearchQuery,
+  changeBlockType,
+  toggleCheckbox,
+  clearLastCreatedBlock,
 } = notesSlice.actions;
 
 export default notesSlice.reducer;
-
-/* ============================
-   Optional Export (for selector usage)
-============================ */
 
 export { searchIndex };
