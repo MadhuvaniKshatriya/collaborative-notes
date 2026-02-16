@@ -52,57 +52,63 @@ export default function RevisionPanel() {
   };
 
   return (
-    <div className="h-full flex flex-col">
-      <div className="p-4 border-b">
-        <h2 className="font-semibold">
-          Revision History
+    <div className="h-full flex flex-col bg-gradient-to-b from-slate-50 to-slate-100">
+      <div className="p-6 border-b border-slate-200 bg-white shadow-sm">
+        <h2 className="font-bold text-lg text-slate-800">
+          ⏰ Revision History
         </h2>
+        <p className="text-xs text-slate-400 mt-1">View and restore versions</p>
       </div>
 
-      <div className="flex-1 overflow-y-auto p-4">
+      <div className="flex-1 overflow-y-auto p-5">
         {!activeNoteId ? (
-          <div className="text-sm text-gray-400">
-            Select a note to view revisions
+          <div className="text-sm text-slate-400 italic text-center py-8">
+            📭 Select a note to view revisions
           </div>
         ) : loading ? (
-          <div className="text-sm text-gray-400">
-            Loading revisions...
+          <div className="text-sm text-slate-400 italic text-center py-8">
+            ⏳ Loading revisions...
           </div>
         ) : noteRevisions.length === 0 ? (
-          <div className="text-sm text-gray-400">
-            No revisions yet
+          <div className="text-sm text-slate-400 italic text-center py-8">
+            📚 No revisions yet
           </div>
         ) : (
-          noteRevisions.map((rev: Revision) => (
+          <div className="space-y-3">
+            {noteRevisions.map((rev: Revision) => (
             <div
               key={rev.id}
-              className="mb-3 p-3 rounded-lg bg-gray-50 hover:bg-gray-100 transition border border-gray-200"
+              className="p-4 rounded-lg bg-white hover:shadow-md transition-all border border-slate-200 hover:border-blue-300"
             >
-              <div className="flex justify-between items-start">
-                <div className="flex-1">
-                  <div className="text-sm font-medium">
+              <div className="flex justify-between items-start gap-2">
+                <div className="flex-1 min-w-0">
+                  <div className="text-sm font-semibold text-slate-800">
                     Version {rev.version}
                   </div>
-                  <div className="text-gray-500 text-xs mt-1">
-                    {new Date(rev.createdAt).toLocaleString()}
+                  <div className="text-slate-400 text-xs mt-1">
+                    📅 {new Date(rev.createdAt).toLocaleDateString()} {new Date(rev.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
-                  <div className="text-gray-600 text-xs mt-2 max-h-16 overflow-hidden">
-                    {rev.blocks
-                      .slice(0, 2)
-                      .map((b) => b.content)
-                      .join(" ")}
+                  <div className="text-slate-600 text-xs mt-3 max-h-20 overflow-hidden bg-slate-50 p-2 rounded line-clamp-3">
+                    {rev.blocks.length > 0
+                      ? rev.blocks
+                          .slice(0, 2)
+                          .map((b) => b.content || "(empty block)")
+                          .filter(c => c.trim())
+                          .join(" • ")
+                      : "(empty note)"}
                   </div>
                 </div>
                 <button
                   onClick={() => handleRestore(rev.id)}
                   disabled={restoring}
-                  className="ml-2 px-2 py-1 text-xs bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-400 transition"
+                  className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-md disabled:from-slate-400 disabled:to-slate-400 transition-all"
                 >
-                  {restoring ? "Restoring..." : "Restore"}
+                  {restoring ? "⟳" : "↺"}
                 </button>
               </div>
             </div>
-          ))
+            ))}
+          </div>
         )}
       </div>
     </div>

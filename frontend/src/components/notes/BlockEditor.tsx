@@ -44,9 +44,14 @@ export default function BlockEditor({
     const handleSelect = (type: BlockType) => {
         onTypeChange(type);
 
-        // remove trailing slash
-        const updated = block.content.replace(/\/$/, "");
-        onChange(updated);
+        // For checkbox, bullet, code: clear the content and start fresh
+        if (type === "checkbox" || type === "bullet" || type === "code") {
+            onChange("");
+        } else {
+            // For other types: remove trailing slash and keep content
+            const updated = block.content.replace(/\/$/, "");
+            onChange(updated);
+        }
 
         setShowMenu(false);
 
@@ -105,7 +110,7 @@ export default function BlockEditor({
             element = (
                 <input
                     ref={inputRef as React.RefObject<HTMLInputElement>}
-                    className="text-3xl font-bold w-full outline-none py-1 bg-transparent"
+                    className="text-4xl font-bold w-full outline-none py-2 px-3 bg-transparent text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
                     value={block.content}
                     onChange={(e) => handleChange(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -116,16 +121,18 @@ export default function BlockEditor({
 
         case "checkbox":
             element = (
-                <div className="flex items-center gap-2">
+                <div className="flex items-center gap-3 group p-2 rounded-lg hover:bg-blue-50 transition-colors">
                     <input
                         type="checkbox"
                         checked={block.checked || false}
                         onChange={onToggleCheckbox}
-                        className="h-4 w-4"
+                        className="h-5 w-5 flex-shrink-0 cursor-pointer accent-blue-500 rounded transition-transform hover:scale-110"
                     />
                     <input
                         ref={inputRef as React.RefObject<HTMLInputElement>}
-                        className="flex-1 outline-none py-1 bg-transparent"
+                        className={`flex-1 outline-none py-1 px-2 bg-transparent rounded transition-all ${
+                            block.checked ? "line-through text-gray-400" : "text-gray-700"
+                        }`}
                         value={block.content}
                         onChange={(e) => handleChange(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -145,14 +152,14 @@ export default function BlockEditor({
                     el.style.height = el.scrollHeight + "px";
                     }
                 }}
-                className="w-full bg-white font-mono p-3 rounded border outline-none resize-none"
+                className="w-full bg-slate-900 text-slate-50 font-mono p-4 rounded-lg border border-slate-700 outline-none resize-none shadow-sm hover:shadow-md transition-shadow"
                 value={block.content}
                 onChange={(e) => {
                     handleChange(e.target.value);
                     e.target.style.height = "auto";
                     e.target.style.height = e.target.scrollHeight + "px";
                 }}
-                placeholder="Code block"
+                placeholder="// Code block..."
                 onKeyDown={(e) => {
                     // SHIFT + ENTER → new block
                     if (e.key === "Enter" && e.shiftKey) {
@@ -178,11 +185,11 @@ export default function BlockEditor({
 
         case "bullet":
             element = (
-                <div className="flex items-start gap-2">
-                    <span className="mt-2 text-gray-500">•</span>
+                <div className="flex items-start gap-3 group p-2 rounded-lg hover:bg-amber-50 transition-colors">
+                    <span className="mt-1 text-amber-600 font-bold flex-shrink-0">•</span>
                     <input
                         ref={inputRef as React.RefObject<HTMLInputElement>}
-                        className="flex-1 outline-none py-1 bg-transparent"
+                        className="flex-1 outline-none py-1 px-2 bg-transparent rounded transition-all text-gray-700"
                         value={block.content}
                         onChange={(e) => handleChange(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -199,7 +206,7 @@ export default function BlockEditor({
                         inputRef.current = el;
                         if (el) autoResize(el);
                     }}
-                    className="w-full outline-none py-1 bg-transparent resize-none"
+                    className="w-full outline-none py-2 px-3 bg-transparent resize-none text-gray-700 rounded-lg hover:bg-gray-50 transition-colors focus:bg-white"
                     value={block.content}
                     placeholder="Type '/' for commands..."
                     onChange={(e) => {

@@ -13,10 +13,10 @@ export default function EditorLayout() {
   }, [dispatch]);
 
   return (
-    <div className="h-screen flex bg-gray-100">
+    <div className="h-screen flex bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
       
       {/* Sidebar */}
-      <div className="w-[340px] bg-white border-r shadow-sm">
+      <div className="w-[340px] bg-white border-r border-slate-200 shadow-lg">
         <Sidebar />
       </div>
 
@@ -26,7 +26,7 @@ export default function EditorLayout() {
       </div>
 
       {/* Revision History */}
-      <div className="w-[340px] bg-white border-l shadow-sm">
+      <div className="w-[340px] bg-white border-l border-slate-200 shadow-lg">
         <RevisionPanel />
       </div>
 

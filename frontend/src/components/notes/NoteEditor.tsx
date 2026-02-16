@@ -55,55 +55,56 @@ export default function NoteEditor() {
 
 
   return (
-    <div className="flex-1 flex flex-col bg-gray-100">
+    <div className="flex-1 flex flex-col bg-gradient-to-b from-white via-slate-50 to-slate-100">
       {/* Top Status Bar */}
-      <div className="px-8 py-4 bg-white border-b flex justify-between items-center">
-        <div className="text-sm text-gray-400">
-          Version {version}
+      <div className="px-8 py-4 bg-white border-b border-slate-200 shadow-sm flex justify-between items-center">
+        <div className="text-sm text-slate-500 font-medium">
+          Version <span className="text-blue-600 font-semibold">{version}</span>
         </div>
         <SaveIndicator />
       </div>
 
       {/* Block Editor Area */}
       <div className="flex-1 overflow-y-auto">
-        <div className="max-w-3xl mx-auto px-10 py-10 space-y-3">
+        <div className="max-w-3xl mx-auto px-10 py-8 space-y-1">
           {localBlocks.map((block) => (
-            <BlockEditor
-              key={block.id}
-              block={block}
-              autoFocus={block.id === lastCreatedBlockId}
-              onChange={(value) =>
-                dispatch(
-                  updateBlock({
-                    blockId: block.id,
-                    content: value,
-                  })
-                )
-              }
-              onEnter={(type) =>
-                dispatch(
-                  addBlock({
-                    afterId: block.id,
-                    type: type || "paragraph",
-                  })
-                )
-              }
-              onTypeChange={(type) =>
-                dispatch(
-                  changeBlockType({
-                    blockId: block.id,
-                    type,
-                  })
-                )
-              }
-              onToggleCheckbox={() =>
-                dispatch(
-                  toggleCheckbox({
-                    blockId: block.id,
-                  })
-                )
-              }
-            />
+            <div key={block.id} className="hover:bg-slate-100 rounded-lg transition-colors p-1">
+              <BlockEditor
+                block={block}
+                autoFocus={block.id === lastCreatedBlockId}
+                onChange={(value) =>
+                  dispatch(
+                    updateBlock({
+                      blockId: block.id,
+                      content: value,
+                    })
+                  )
+                }
+                onEnter={(type) =>
+                  dispatch(
+                    addBlock({
+                      afterId: block.id,
+                      type: type || "paragraph",
+                    })
+                  )
+                }
+                onTypeChange={(type) =>
+                  dispatch(
+                    changeBlockType({
+                      blockId: block.id,
+                      type,
+                    })
+                  )
+                }
+                onToggleCheckbox={() =>
+                  dispatch(
+                    toggleCheckbox({
+                      blockId: block.id,
+                    })
+                  )
+                }
+              />
+            </div>
           ))}
         </div>
       </div>

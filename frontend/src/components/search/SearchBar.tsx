@@ -9,12 +9,22 @@ export default function SearchBar() {
   );
 
   return (
-    <input
-      type="text"
-      placeholder="Search notes..."
-      value={searchQuery}
-      onChange={(e) => dispatch(setSearchQuery(e.target.value))}
-      className="w-full border px-3 py-2 mb-4 rounded text-sm"
-    />
+    <div className="relative mb-5">
+      <input
+        type="text"
+        placeholder="🔍 Search notes..."
+        value={searchQuery}
+        onChange={(e) => dispatch(setSearchQuery(e.target.value))}
+        className="w-full border border-slate-300 px-4 py-2.5 rounded-lg text-sm bg-white shadow-sm hover:shadow-md focus:shadow-md transition-all focus:border-blue-400"
+      />
+      {searchQuery && (
+        <button
+          onClick={() => dispatch(setSearchQuery(""))}
+          className="absolute right-3 top-2.5 text-slate-400 hover:text-slate-600 text-lg"
+        >
+          ✕
+        </button>
+      )}
+    </div>
   );
 }

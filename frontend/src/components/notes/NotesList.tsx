@@ -37,28 +37,28 @@ export default function NotesList() {
 
 
   return (
-    <div className="flex-1 overflow-y-auto">
+    <div className="flex-1 overflow-y-auto space-y-2">
       {/* Empty State */}
       {filteredNotes.length === 0 && (
-        <div className="text-gray-400 text-sm">
-          {searchQuery ? "No matching notes" : "No notes yet"}
+        <div className="text-slate-400 text-sm italic py-8 text-center">
+          {searchQuery ? "📭 No matching notes" : "📚 No notes yet"}
         </div>
       )}
 
       {/* Notes List */}
-      <div className="flex flex-col">
+      <div className="flex flex-col gap-2">
           {filteredNotes.map((note) => (
           <div
             key={note.id}
-            className={`p-3 mb-2 rounded transition ${
+            className={`p-4 rounded-lg transition-all ${
               activeNoteId === note.id
-                ? "bg-blue-100"
-                : "hover:bg-gray-100"
+                ? "bg-blue-500 text-white shadow-md scale-105 origin-left"
+                : "bg-white hover:bg-slate-50 hover:shadow-md text-slate-800 border border-slate-200"
             }`}
           >
             {editingId === note.id ? (
               <input
-                className="w-full border px-2 py-1 text-sm rounded"
+                className="w-full border border-slate-300 px-3 py-2 text-sm rounded-lg bg-white text-slate-800"
                 value={tempTitle}
                 onChange={(e) => setTempTitle(e.target.value)}
                 onBlur={() => {
@@ -84,43 +84,54 @@ export default function NotesList() {
                 autoFocus
               />
             ) : (
-              <div className="flex justify-between items-center">
+              <div className="flex justify-between items-start gap-2">
                 <span
                   onClick={() =>
                     dispatch(setActiveNote(note.id))
                   }
-                  className="cursor-pointer truncate font-medium"
+                  className="cursor-pointer truncate font-semibold flex-1 hover:underline"
                 >
                   {note.title}
                 </span>
 
-                <div className="flex gap-2 text-xs">
+                <div className="flex gap-1 text-xs flex-shrink-0">
                   <button
                     onClick={() => {
                       setEditingId(note.id);
                       setTempTitle(note.title);
                     }}
-                    className="text-blue-600 hover:underline"
+                    className={`px-2 py-1 rounded transition-all ${
+                      activeNoteId === note.id
+                        ? "bg-blue-400 hover:bg-blue-300"
+                        : "text-blue-600 hover:bg-blue-100"
+                    }`}
                   >
-                    Rename
+                    ✏️
                   </button>
 
                   <button
                     onClick={() =>
                       dispatch(deleteNote(note.id))
                     }
-                    className="text-red-600 hover:underline"
+                    className={`px-2 py-1 rounded transition-all ${
+                      activeNoteId === note.id
+                        ? "bg-red-400 hover:bg-red-300"
+                        : "text-red-600 hover:bg-red-100"
+                    }`}
                   >
-                    Delete
+                    🗑️
                   </button>
                 </div>
               </div>
             )}
 
             {/* Version + Timestamp */}
-            <div className="text-xs text-gray-500 mt-1">
-              v{note.version} •{" "}
-              {new Date(note.updatedAt).toLocaleString()}
+            <div className={`text-xs mt-2 ${
+              activeNoteId === note.id
+                ? "text-blue-100"
+                : "text-slate-400"
+            }`}>
+              v{note.version} • {new Date(note.updatedAt).toLocaleDateString()} {new Date(note.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
             </div>
           </div>
         ))}
