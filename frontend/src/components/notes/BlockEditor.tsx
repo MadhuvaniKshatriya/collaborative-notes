@@ -138,11 +138,40 @@ export default function BlockEditor({
         case "code":
             element = (
                 <textarea
-                    ref={inputRef as React.RefObject<HTMLTextAreaElement>}
-                    className="w-full bg-gray-100 font-mono p-3 rounded outline-none"
-                    value={block.content}
-                    onChange={(e) => handleChange(e.target.value)}
-                    placeholder="Code block"
+                ref={(el) => {
+                    inputRef.current = el;
+                    if (el) {
+                    el.style.height = "auto";
+                    el.style.height = el.scrollHeight + "px";
+                    }
+                }}
+                className="w-full bg-white font-mono p-3 rounded border outline-none resize-none"
+                value={block.content}
+                onChange={(e) => {
+                    handleChange(e.target.value);
+                    e.target.style.height = "auto";
+                    e.target.style.height = e.target.scrollHeight + "px";
+                }}
+                placeholder="Code block"
+                onKeyDown={(e) => {
+                    // SHIFT + ENTER → new block
+                    if (e.key === "Enter" && e.shiftKey) {
+                    e.preventDefault();
+                    onEnter("paragraph");
+                    return;
+                    }
+
+                    // ENTER → stay inside code block (default behavior)
+                    if (e.key === "Enter" && !e.shiftKey) {
+                    return; // allow newline
+                    }
+
+                    if (e.key === "Escape") {
+                    setShowMenu(false);
+                    }
+                }}
+                rows={1}
+                style={{ overflow: "hidden" }}
                 />
             );
             break;
