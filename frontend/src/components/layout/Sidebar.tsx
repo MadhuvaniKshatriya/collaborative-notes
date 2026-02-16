@@ -11,20 +11,24 @@ export default function Sidebar() {
   };
 
   return (
-    <div className="h-full p-6 flex flex-col bg-gradient-to-b from-slate-50 to-slate-100 border-r border-slate-200">
+    <div className="h-full p-6 flex flex-col bg-white">
   <div className="mb-6">
-    <h1 className="text-2xl font-bold text-slate-800">📝 Notes</h1>
-    <p className="text-xs text-slate-400 mt-1">Collaborative notes with autosave</p>
+    <div className="flex items-center gap-3 mb-2">
+      <div className="text-2xl">📝</div>
+      <div>
+        <h1 className="text-2xl font-bold text-neutral-900">Notes</h1>
+        <p className="text-xs text-neutral-500">Collaborative workspace</p>
+      </div>
+    </div>
   </div>
 
   <SearchBar />
 
   <button
     onClick={handleCreateNote}
-    className="mb-5 w-full bg-gradient-to-r from-blue-500 to-blue-600 text-white py-3 rounded-lg hover:shadow-lg hover:from-blue-600 hover:to-blue-700 transition shadow-md font-medium"
-
+    className="mb-5 w-full bg-primary text-blue py-2.5 rounded-lg hover:bg-blue-600 active:bg-blue-700 transition font-medium shadow-sm hover:shadow-md"
   >
-    ➕ New Note
+    + New Note
   </button>
 
   <div className="flex-1 overflow-y-auto">

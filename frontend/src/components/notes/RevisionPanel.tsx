@@ -52,43 +52,48 @@ export default function RevisionPanel() {
   };
 
   return (
-    <div className="h-full flex flex-col bg-gradient-to-b from-slate-50 to-slate-100">
-      <div className="p-6 border-b border-slate-200 bg-white shadow-sm">
-        <h2 className="font-bold text-lg text-slate-800">
-          ⏰ Revision History
+    <div className="h-full flex flex-col bg-white">
+      <div className="p-6 border-b border-neutral-200 bg-white">
+        <h2 className="font-bold text-lg text-neutral-900">
+          ⏰ Version History
         </h2>
-        <p className="text-xs text-slate-400 mt-1">View and restore versions</p>
+        <p className="text-xs text-neutral-500 mt-1">Browse and restore versions</p>
       </div>
 
       <div className="flex-1 overflow-y-auto p-5">
         {!activeNoteId ? (
-          <div className="text-sm text-slate-400 italic text-center py-8">
-            📭 Select a note to view revisions
+          <div className="text-sm text-neutral-400 italic text-center py-8">
+            Select a note to view its history
           </div>
         ) : loading ? (
-          <div className="text-sm text-slate-400 italic text-center py-8">
-            ⏳ Loading revisions...
+          <div className="text-sm text-neutral-400 italic text-center py-8">
+            Loading versions...
           </div>
         ) : noteRevisions.length === 0 ? (
-          <div className="text-sm text-slate-400 italic text-center py-8">
-            📚 No revisions yet
+          <div className="text-sm text-neutral-400 italic text-center py-8">
+            No versions yet
           </div>
         ) : (
           <div className="space-y-3">
             {noteRevisions.map((rev: Revision) => (
             <div
               key={rev.id}
-              className="p-4 rounded-lg bg-white hover:shadow-md transition-all border border-slate-200 hover:border-blue-300"
+              className="p-4 rounded-lg bg-white border border-neutral-200 hover:shadow-md transition-all hover:border-neutral-300"
             >
-              <div className="flex justify-between items-start gap-2">
+              <div className="flex justify-between items-start gap-3">
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-semibold text-slate-800">
-                    Version {rev.version}
+                  <div className="flex items-center gap-2 mb-1">
+                    <div className="text-sm font-semibold text-neutral-900">
+                      v{rev.version}
+                    </div>
+                    {rev.version === noteRevisions[0]?.version && (
+                      <span className="text-xs badge badge-primary">Latest</span>
+                    )}
                   </div>
-                  <div className="text-slate-400 text-xs mt-1">
-                    📅 {new Date(rev.createdAt).toLocaleDateString()} {new Date(rev.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                  <div className="text-xs text-neutral-500 mb-3">
+                    {new Date(rev.createdAt).toLocaleDateString()} at {new Date(rev.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                   </div>
-                  <div className="text-slate-600 text-xs mt-3 max-h-20 overflow-hidden bg-slate-50 p-2 rounded line-clamp-3">
+                  <div className="text-xs text-neutral-600 line-clamp-3 bg-neutral-50 p-2 rounded max-h-20 overflow-hidden">
                     {rev.blocks.length > 0
                       ? rev.blocks
                           .slice(0, 2)
@@ -101,7 +106,8 @@ export default function RevisionPanel() {
                 <button
                   onClick={() => handleRestore(rev.id)}
                   disabled={restoring}
-                  className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-md disabled:from-slate-400 disabled:to-slate-400 transition-all"
+                  className="flex-shrink-0 px-3 py-1.5 text-xs font-medium bg-primary text-white rounded-md hover:bg-blue-600 disabled:bg-neutral-300 transition-all"
+                  title="Restore this version"
                 >
                   {restoring ? "⟳" : "↺"}
                 </button>

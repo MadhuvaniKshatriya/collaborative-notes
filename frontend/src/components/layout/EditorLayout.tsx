@@ -13,20 +13,20 @@ export default function EditorLayout() {
   }, [dispatch]);
 
   return (
-    <div className="h-screen flex bg-gradient-to-br from-slate-100 via-slate-50 to-blue-50">
+    <div className="h-screen flex bg-white">
       
       {/* Sidebar */}
-      <div className="w-[340px] bg-white border-r border-slate-200 shadow-lg">
+      <div className="w-80 bg-white border-r border-neutral-200 flex flex-col overflow-hidden shadow-sm">
         <Sidebar />
       </div>
 
       {/* Main Editor */}
-      <div className="flex-1 flex flex-col">
+      <div className="flex-1 flex flex-col overflow-hidden">
         <NoteEditor />
       </div>
 
       {/* Revision History */}
-      <div className="w-[340px] bg-white border-l border-slate-200 shadow-lg">
+      <div className="w-80 bg-white border-l border-neutral-200 flex flex-col overflow-hidden shadow-sm">
         <RevisionPanel />
       </div>
 

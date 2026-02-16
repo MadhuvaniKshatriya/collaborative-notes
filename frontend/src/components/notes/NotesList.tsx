@@ -40,8 +40,8 @@ export default function NotesList() {
     <div className="flex-1 overflow-y-auto space-y-2">
       {/* Empty State */}
       {filteredNotes.length === 0 && (
-        <div className="text-slate-400 text-sm italic py-8 text-center">
-          {searchQuery ? "📭 No matching notes" : "📚 No notes yet"}
+        <div className="text-neutral-400 text-sm italic py-8 text-center">
+          {searchQuery ? "No matching notes found" : "Create your first note to get started"}
         </div>
       )}
 
@@ -50,15 +50,15 @@ export default function NotesList() {
           {filteredNotes.map((note) => (
           <div
             key={note.id}
-            className={`p-4 rounded-lg transition-all ${
+            className={`p-4 rounded-lg border transition-all cursor-pointer ${
               activeNoteId === note.id
-                ? "bg-blue-500 text-white shadow-md scale-105 origin-left"
-                : "bg-white hover:bg-slate-50 hover:shadow-md text-slate-800 border border-slate-200"
+                ? "bg-primary-light border-primary shadow-md"
+                : "bg-white border-neutral-200 hover:border-neutral-300 hover:shadow-sm"
             }`}
           >
             {editingId === note.id ? (
               <input
-                className="w-full border border-slate-300 px-3 py-2 text-sm rounded-lg bg-white text-slate-800"
+                className="w-full border border-neutral-300 px-3 py-2 text-sm rounded-md bg-white text-neutral-900 font-medium"
                 value={tempTitle}
                 onChange={(e) => setTempTitle(e.target.value)}
                 onBlur={() => {
@@ -84,55 +84,66 @@ export default function NotesList() {
                 autoFocus
               />
             ) : (
-              <div className="flex justify-between items-start gap-2">
-                <span
-                  onClick={() =>
-                    dispatch(setActiveNote(note.id))
-                  }
-                  className="cursor-pointer truncate font-semibold flex-1 hover:underline"
-                >
-                  {note.title}
-                </span>
-
-                <div className="flex gap-1 text-xs flex-shrink-0">
-                  <button
-                    onClick={() => {
-                      setEditingId(note.id);
-                      setTempTitle(note.title);
-                    }}
-                    className={`px-2 py-1 rounded transition-all ${
-                      activeNoteId === note.id
-                        ? "bg-blue-400 hover:bg-blue-300"
-                        : "text-blue-600 hover:bg-blue-100"
-                    }`}
-                  >
-                    ✏️
-                  </button>
-
-                  <button
+              <>
+                <div className="flex justify-between items-start gap-2 mb-2">
+                  <span
                     onClick={() =>
-                      dispatch(deleteNote(note.id))
+                      dispatch(setActiveNote(note.id))
                     }
-                    className={`px-2 py-1 rounded transition-all ${
+                    className={`font-semibold flex-1 truncate ${
                       activeNoteId === note.id
-                        ? "bg-red-400 hover:bg-red-300"
-                        : "text-red-600 hover:bg-red-100"
+                        ? "text-primary-dark"
+                        : "text-neutral-900"
                     }`}
                   >
-                    🗑️
-                  </button>
-                </div>
-              </div>
-            )}
+                    {note.title}
+                  </span>
 
-            {/* Version + Timestamp */}
-            <div className={`text-xs mt-2 ${
-              activeNoteId === note.id
-                ? "text-blue-100"
-                : "text-slate-400"
-            }`}>
-              v{note.version} • {new Date(note.updatedAt).toLocaleDateString()} {new Date(note.updatedAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-            </div>
+                  <div className="flex gap-1 flex-shrink-0 opacity-0 hover:opacity-100 transition-opacity">
+                    <button
+                      onClick={() => {
+                        setEditingId(note.id);
+                        setTempTitle(note.title);
+                      }}
+                      className="p-1.5 text-neutral-500 hover:text-primary rounded transition-colors"
+                      title="Rename"
+                    >
+                      ✏️
+                    </button>
+
+                    <button
+                      onClick={() =>
+                        dispatch(deleteNote(note.id))
+                      }
+                      className="p-1.5 text-neutral-500 hover:text-red-600 rounded transition-colors"
+                      title="Delete"
+                    >
+                      🗑️
+                    </button>
+                  </div>
+                </div>
+
+                {/* Preview Snippet */}
+                <div className="text-xs text-neutral-500 mb-3 line-clamp-2">
+                  {note.blocks && note.blocks.length > 0
+                    ? note.blocks
+                        .map((b: any) => b.content)
+                        .filter((c: string) => c?.trim())
+                        .join(" • ")
+                    : "No content yet"}
+                </div>
+
+                {/* Metadata */}
+                <div className={`text-xs flex justify-between ${
+                  activeNoteId === note.id
+                    ? "text-primary-dark"
+                    : "text-neutral-400"
+                }`}>
+                  <span>v{note.version}</span>
+                  <span>{new Date(note.updatedAt).toLocaleDateString()}</span>
+                </div>
+              </>
+            )}
           </div>
         ))}
       </div>

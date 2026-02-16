@@ -110,7 +110,7 @@ export default function BlockEditor({
             element = (
                 <input
                     ref={inputRef as React.RefObject<HTMLInputElement>}
-                    className="text-4xl font-bold w-full outline-none py-2 px-3 bg-transparent text-slate-800 rounded-lg hover:bg-slate-100 transition-colors"
+                    className="text-3xl font-bold w-full outline-none py-2 px-3 bg-transparent text-neutral-900 rounded-lg hover:bg-neutral-50 transition-colors"
                     value={block.content}
                     onChange={(e) => handleChange(e.target.value)}
                     onKeyDown={handleKeyDown}
@@ -121,17 +121,17 @@ export default function BlockEditor({
 
         case "checkbox":
             element = (
-                <div className="flex items-center gap-3 group p-2 rounded-lg hover:bg-blue-50 transition-colors">
+                <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors group">
                     <input
                         type="checkbox"
                         checked={block.checked || false}
                         onChange={onToggleCheckbox}
-                        className="h-5 w-5 flex-shrink-0 cursor-pointer accent-blue-500 rounded transition-transform hover:scale-110"
+                        className="mt-1 h-5 w-5 flex-shrink-0"
                     />
                     <input
                         ref={inputRef as React.RefObject<HTMLInputElement>}
                         className={`flex-1 outline-none py-1 px-2 bg-transparent rounded transition-all ${
-                            block.checked ? "line-through text-gray-400" : "text-gray-700"
+                            block.checked ? "line-through text-neutral-400" : "text-neutral-900"
                         }`}
                         value={block.content}
                         onChange={(e) => handleChange(e.target.value)}
@@ -152,7 +152,7 @@ export default function BlockEditor({
                     el.style.height = el.scrollHeight + "px";
                     }
                 }}
-                className="w-full bg-slate-900 text-slate-50 font-mono p-4 rounded-lg border border-slate-700 outline-none resize-none shadow-sm hover:shadow-md transition-shadow"
+                className="w-full bg-neutral-900 text-neutral-50 font-mono p-4 rounded-lg border border-neutral-800 outline-none resize-none shadow-sm hover:shadow-md transition-shadow"
                 value={block.content}
                 onChange={(e) => {
                     handleChange(e.target.value);
@@ -185,11 +185,11 @@ export default function BlockEditor({
 
         case "bullet":
             element = (
-                <div className="flex items-start gap-3 group p-2 rounded-lg hover:bg-amber-50 transition-colors">
-                    <span className="mt-1 text-amber-600 font-bold flex-shrink-0">•</span>
+                <div className="flex items-start gap-3 p-2 rounded-lg hover:bg-neutral-50 transition-colors">
+                    <span className="mt-1 text-neutral-600 font-semibold flex-shrink-0">•</span>
                     <input
                         ref={inputRef as React.RefObject<HTMLInputElement>}
-                        className="flex-1 outline-none py-1 px-2 bg-transparent rounded transition-all text-gray-700"
+                        className="flex-1 outline-none py-1 px-2 bg-transparent rounded transition-all text-neutral-900"
                         value={block.content}
                         onChange={(e) => handleChange(e.target.value)}
                         onKeyDown={handleKeyDown}
@@ -206,7 +206,7 @@ export default function BlockEditor({
                         inputRef.current = el;
                         if (el) autoResize(el);
                     }}
-                    className="w-full outline-none py-2 px-3 bg-transparent resize-none text-gray-700 rounded-lg hover:bg-gray-50 transition-colors focus:bg-white"
+                    className="w-full outline-none py-2 px-3 bg-transparent resize-none text-neutral-900 rounded-lg hover:bg-neutral-50 transition-colors focus:bg-neutral-50"
                     value={block.content}
                     placeholder="Type '/' for commands..."
                     onChange={(e) => {
