@@ -1,16 +1,14 @@
-import { useDispatch, useSelector } from "react-redux";
-import { addNote } from "../../features/notes/notesSlice";
-import { selectFilteredNotes } from "../../features/notes/selectors";
-import type { RootState } from "../../app/store";
-import NoteItem from "../notes/NoteItem";
+import { useDispatch } from "react-redux";
+import { createNoteThunk } from "../../features/notes/notesThunk";
 import SearchBar from "../search/SearchBar";
+import NotesList from "../notes/NotesList";
 
 export default function Sidebar() {
   const dispatch = useDispatch();
-  const filteredNotes = useSelector(selectFilteredNotes);
-  const activeNoteId = useSelector(
-    (state: RootState) => state.notes.activeNoteId
-  );
+
+  const handleCreateNote = () => {
+    void dispatch(createNoteThunk() as any);
+  };
 
   return (
     <div className="h-full p-5 flex flex-col">
@@ -19,20 +17,15 @@ export default function Sidebar() {
   <SearchBar />
 
   <button
-    onClick={() => dispatch(addNote())}
+    onClick={handleCreateNote}
     className="mb-4 w-full bg-blue-600 text-white py-2.5 rounded-lg hover:bg-blue-700 transition shadow-sm"
 
   >
     + New Note
   </button>
 
-  <div className="flex-1">
-    {filteredNotes.length > 0 && (
-      <NoteItem
-        note={filteredNotes[0]}
-        isActive={filteredNotes[0].id === activeNoteId}
-      />
-    )}
+  <div className="flex-1 overflow-y-auto">
+    <NotesList />
   </div>
 </div>
 

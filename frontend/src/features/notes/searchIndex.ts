@@ -8,9 +8,6 @@ export class SearchIndex {
       .filter(Boolean);
   }
 
-  /* ===============================
-     Add Note (Prefix Indexing)
-  =============================== */
   addNote(noteId: string, text: string) {
     const tokens = this.tokenize(text);
 
@@ -28,18 +25,12 @@ export class SearchIndex {
     });
   }
 
-  /* ===============================
-     Remove Note
-  =============================== */
   removeNote(noteId: string) {
     this.index.forEach((set) => {
       set.delete(noteId);
     });
   }
 
-  /* ===============================
-     Search
-  =============================== */
   search(query: string): string[] {
     const normalized = query.toLowerCase().trim();
     if (!normalized) return [];

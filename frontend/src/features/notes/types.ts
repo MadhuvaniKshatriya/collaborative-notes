@@ -1,11 +1,9 @@
 export interface Revision {
   id: string;
   noteId: string;
-  content: string;
+  blocks: Block[];
   version: number;
-  editedBy: string;
-  editedAt: string;
-  restoredFrom?: number;
+  createdAt: string;
 }
 
 export type BlockType =

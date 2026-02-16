@@ -3,13 +3,10 @@ import { useState, useMemo } from "react";
 import type { RootState } from "../../app/store";
 import {
   setActiveNote,
-  addNote,
   renameNote,
   deleteNote,
 } from "../../features/notes/notesSlice";
 import { searchIndex } from "../../features/notes/notesSlice";
-
-import SearchBar from "../search/SearchBar";
 
 export default function NotesList() {
   const dispatch = useDispatch();
@@ -18,13 +15,9 @@ export default function NotesList() {
     (state: RootState) => state.notes
   );
 
-  // 🔹 Editing state (must be outside map)
   const [editingId, setEditingId] = useState<string | null>(null);
   const [tempTitle, setTempTitle] = useState("");
 
-  /* ===============================
-     Filter + Sort Notes
-  =============================== */
 
   const filteredNotes = useMemo(() => {
     let noteArray = Object.values(notes);
@@ -35,7 +28,6 @@ export default function NotesList() {
       noteArray = noteArray.filter((n) => matchedIds.includes(n.id));
     }
 
-    // 🕒 Sort recent-first
     return noteArray.sort(
       (a, b) =>
         new Date(b.updatedAt).getTime() -
@@ -43,26 +35,9 @@ export default function NotesList() {
     );
   }, [notes, searchQuery]);
 
-  /* ===============================
-     Render
-  =============================== */
 
   return (
-    <div className="w-1/4 border-r bg-white p-4 flex flex-col h-full">
-      {/* Header */}
-      <h2 className="font-semibold text-lg mb-2">Notes</h2>
-
-      {/* Search Bar */}
-      <SearchBar />
-
-      {/* New Note Button */}
-      <button
-        onClick={() => dispatch(addNote())}
-        className="mb-4 w-full bg-blue-600 text-white py-2 rounded hover:bg-blue-700 transition"
-      >
-        + New Note
-      </button>
-
+    <div className="flex-1 overflow-y-auto">
       {/* Empty State */}
       {filteredNotes.length === 0 && (
         <div className="text-gray-400 text-sm">
@@ -71,8 +46,8 @@ export default function NotesList() {
       )}
 
       {/* Notes List */}
-      <div className="flex-1 overflow-y-auto">
-        {filteredNotes.map((note) => (
+      <div className="flex flex-col">
+          {filteredNotes.map((note) => (
           <div
             key={note.id}
             className={`p-3 mb-2 rounded transition ${

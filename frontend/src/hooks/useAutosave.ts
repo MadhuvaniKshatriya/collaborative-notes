@@ -8,29 +8,7 @@ import {
   saveError,
   setConflict,
 } from "../features/notes/notesSlice";
-
-/* ============================
-   Fake API Call (Replace Later)
-============================ */
-
-async function fakeApiSave(
-  noteId: string,
-  blocks: any[],
-  version: number
-) {
-  // simulate network delay
-  await new Promise((r) => setTimeout(r, 500));
-
-  return {
-    version: version + 1,
-    conflict: false,
-    remoteBlocks: blocks,
-  };
-}
-
-/* ============================
-   Hook
-============================ */
+import { updateNote, fetchNote } from "../features/notes/notesApi";
 
 export const useAutosave = () => {
   const dispatch = useDispatch();
@@ -38,72 +16,64 @@ export const useAutosave = () => {
   const {
     activeNoteId,
     localBlocks,
-    notes,
-    requestSequence,
+    version,
     saveStatus,
+    notes,
   } = useSelector((state: RootState) => state.notes);
 
-  const latestSeqRef = useRef(requestSequence);
-
-  useEffect(() => {
-    latestSeqRef.current = requestSequence;
-  }, [requestSequence]);
-
   const debouncedSave = useRef(
-    debounce(async () => {
-      if (!activeNoteId) return;
-
-      const note = notes[activeNoteId];
-      if (!note) return;
-
-      // Only save if unsaved
-      if (saveStatus.state !== "unsaved") return;
-
+    debounce(async (noteId: string, blocks: any[], version: number, title: string) => {
       dispatch(startSaving());
 
-      const currentSeq = latestSeqRef.current + 1;
-      const currentVersion = note.version;
-
       try {
-        const response = await fakeApiSave(
-          activeNoteId,
-          localBlocks,
-          currentVersion
+        const data = await updateNote(
+          noteId,
+          title,
+          blocks,
+          version
         );
 
-        if (response.conflict) {
-          dispatch(
-            setConflict({
-              remoteBlocks: response.remoteBlocks,
-              remoteVersion: response.version,
-            })
-          );
+        dispatch(
+          saveSuccess({
+            version: data.version,
+          })
+        );
+      } catch (err: any) {
+        if (err.message === "CONFLICT" || err.status === 409) {
+          try {
+            const remote = await fetchNote(noteId);
+            dispatch(
+              setConflict({
+                remoteBlocks: remote.blocks,
+                remoteVersion: remote.version,
+              })
+            );
+          } catch (fetchErr) {
+            console.error("Failed to fetch remote note for conflict", fetchErr);
+            dispatch(saveError());
+          }
         } else {
-          dispatch(
-            saveSuccess({
-              version: response.version,
-              seq: currentSeq,
-            })
-          );
+          console.error("Save error:", err);
+          dispatch(saveError());
         }
-      } catch (err) {
-        dispatch(saveError());
       }
     }, 800)
   ).current;
 
-  /* ============================
-     Trigger on block change
-  ============================ */
-
   useEffect(() => {
-  if (!activeNoteId) return;
+    if (!activeNoteId) return;
+    if (saveStatus.state !== "unsaved") return;
 
-  if (saveStatus.state !== "unsaved") return;
+    const note = notes[activeNoteId];
+    if (!note) return;
 
-  debouncedSave();
+    debouncedSave(
+      activeNoteId,
+      localBlocks,
+      version,
+      note.title
+    );
 
-  return () => debouncedSave.cancel();
-}, [localBlocks]);
-
+    return () => debouncedSave.cancel();
+  }, [localBlocks, saveStatus.state, activeNoteId, version, notes, dispatch, debouncedSave]);
 };

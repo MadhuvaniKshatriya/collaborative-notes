@@ -26,7 +26,7 @@ export default function ConflictModal() {
             <h3 className="font-medium mb-2">Your Version</h3>
             <textarea
               readOnly
-              value={conflictData.localContent}
+              value={conflictData.localBlocks.map((b) => b.content).join("\n")}
               className="w-full h-48 border p-3 bg-gray-50"
             />
           </div>
@@ -35,7 +35,7 @@ export default function ConflictModal() {
             <h3 className="font-medium mb-2">Remote Version</h3>
             <textarea
               readOnly
-              value={conflictData.remoteContent}
+              value={conflictData.remoteBlocks.map((b) => b.content).join("\n")}
               className="w-full h-48 border p-3 bg-gray-50"
             />
           </div>

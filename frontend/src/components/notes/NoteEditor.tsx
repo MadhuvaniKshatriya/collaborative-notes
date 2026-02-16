@@ -21,11 +21,10 @@ export default function NoteEditor() {
     localBlocks,
     saveStatus,
     lastCreatedBlockId,
+    version, 
   } = useSelector((state: RootState) => state.notes);
 
-  /* ============================
-     Prevent Refresh Data Loss
-  ============================ */
+   //  Prevent Refresh Data Loss
 
   const shouldBlock =
     !!activeNoteId &&
@@ -34,15 +33,10 @@ export default function NoteEditor() {
 
   useBeforeUnloadGuard(shouldBlock);
 
-  /* ============================
-     Autosave Hook
-  ============================ */
+  //Auto Save Hook
 
-  useAutosave();
+  useAutosave(); // must send version + blocks internally
 
-  /* ============================
-     Clear Focus Flag After Use
-  ============================ */
 
   useEffect(() => {
     if (lastCreatedBlockId) {
@@ -50,9 +44,6 @@ export default function NoteEditor() {
     }
   }, [lastCreatedBlockId, dispatch]);
 
-  /* ============================
-     Empty State
-  ============================ */
 
   if (!activeNoteId) {
     return (
@@ -62,61 +53,60 @@ export default function NoteEditor() {
     );
   }
 
-  /* ============================
-     Render
-  ============================ */
 
- return (
-  <div className="flex-1 flex flex-col bg-gray-100">
-    {/* Top Status Bar */}
-    <div className="px-8 py-4 bg-white border-b flex justify-end">
-      <SaveIndicator />
-    </div>
+  return (
+    <div className="flex-1 flex flex-col bg-gray-100">
+      {/* Top Status Bar */}
+      <div className="px-8 py-4 bg-white border-b flex justify-between items-center">
+        <div className="text-sm text-gray-400">
+          Version {version}
+        </div>
+        <SaveIndicator />
+      </div>
 
-    {/* Block Editor Area */}
-    <div className="flex-1 overflow-y-auto">
-      <div className="max-w-3xl mx-auto px-10 py-10 space-y-3">
-        {localBlocks.map((block) => (
-          <BlockEditor
-            key={block.id}
-            block={block}
-            autoFocus={block.id === lastCreatedBlockId}
-            onChange={(value) =>
-              dispatch(
-                updateBlock({
-                  blockId: block.id,
-                  content: value,
-                })
-              )
-            }
-            onEnter={(type) =>
-              dispatch(
-                addBlock({
-                  afterId: block.id,
-                  type: type || "paragraph",
-                })
-              )
-            }
-            onTypeChange={(type) =>
-              dispatch(
-                changeBlockType({
-                  blockId: block.id,
-                  type,
-                })
-              )
-            }
-            onToggleCheckbox={() =>
-              dispatch(
-                toggleCheckbox({
-                  blockId: block.id,
-                })
-              )
-            }
-          />
-        ))}
+      {/* Block Editor Area */}
+      <div className="flex-1 overflow-y-auto">
+        <div className="max-w-3xl mx-auto px-10 py-10 space-y-3">
+          {localBlocks.map((block) => (
+            <BlockEditor
+              key={block.id}
+              block={block}
+              autoFocus={block.id === lastCreatedBlockId}
+              onChange={(value) =>
+                dispatch(
+                  updateBlock({
+                    blockId: block.id,
+                    content: value,
+                  })
+                )
+              }
+              onEnter={(type) =>
+                dispatch(
+                  addBlock({
+                    afterId: block.id,
+                    type: type || "paragraph",
+                  })
+                )
+              }
+              onTypeChange={(type) =>
+                dispatch(
+                  changeBlockType({
+                    blockId: block.id,
+                    type,
+                  })
+                )
+              }
+              onToggleCheckbox={() =>
+                dispatch(
+                  toggleCheckbox({
+                    blockId: block.id,
+                  })
+                )
+              }
+            />
+          ))}
+        </div>
       </div>
     </div>
-  </div>
-);
-
+  );
 }
