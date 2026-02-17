@@ -7,27 +7,209 @@ generator client {
   provider = "prisma-client-js"
 }
 
-model Note {
-  id        String   @id @default(uuid())
-  title     String
-  blocks    String   // JSON stored as string
-  version   Int      @default(1)
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  updatedBy String   @default("system")
+// User Model
+model User {
+  id            String   @id @default(uuid())
+  email         String   @unique
+  username      String   @unique
+  passwordHash  String
+  avatar        String   @default("")
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 
-  revisions Revision[]
+  // Relations
+  createdNotes       Note[]           @relation("CreatedBy")
+  editedNotes        Note[]           @relation("LastEditedBy")
+  createdBlocks      Block[]          @relation("CreatedByBlock")
+  editedBlocks       Block[]          @relation("LastEditedByBlock")
+  workspaceMemberships WorkspaceMember[]
+  ownedWorkspaces    Workspace[]
+  comments           Comment[]
+  resolvedComments   Comment[]        @relation("ResolvedBy")
+  activities         Activity[]
+  sessions           Session[]
+  revisions          Revision[]
+
+  @@index([email])
+  @@index([username])
 }
 
+// Workspace Model
+model Workspace {
+  id          String   @id @default(uuid())
+  name        String
+  description String   @default("")
+  ownerId     String
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  owner       User     @relation(fields: [ownerId], references: [id], onDelete: Cascade)
+  members     WorkspaceMember[]
+  notes       Note[]
+  comments    Comment[]
+  activities  Activity[]
+  sessions    Session[]
+
+  @@index([ownerId])
+}
+
+// WorkspaceMember Model
+model WorkspaceMember {
+  id          String   @id @default(uuid())
+  workspaceId String
+  userId      String
+  role        String   @default("EDITOR")
+  joinedAt    DateTime @default(now())
+
+  // Relations
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([workspaceId, userId])
+  @@index([workspaceId])
+  @@index([userId])
+}
+
+// Note Model
+model Note {
+  id            String   @id @default(uuid())
+  workspaceId   String
+  title         String
+  createdBy     String
+  lastEditedBy  String
+  lastEditedAt  DateTime @default(now())
+  version       Int      @default(1)
+  shareToken    String?  @unique
+  shareExpiredAt DateTime?
+  sharePassword String?  // bcrypt hashed
+  isPublic      Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  workspace     Workspace    @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  createdByUser User         @relation("CreatedBy", fields: [createdBy], references: [id], onDelete: Restrict)
+  lastEditedByUser User      @relation("LastEditedBy", fields: [lastEditedBy], references: [id], onDelete: Restrict)
+  blocks        Block[]
+  revisions     Revision[]
+  comments      Comment[]
+  activities    Activity[]      @relation("ActivityNote")
+
+  @@index([workspaceId])
+  @@index([createdBy])
+  @@index([lastEditedBy])
+  @@index([shareToken])
+}
+
+// Block Model
+model Block {
+  id            String   @id @default(uuid())
+  noteId        String
+  type          String   @default("PARAGRAPH")
+  content       String
+  order         Int      @default(0)
+  createdBy     String
+  lastEditedBy  String
+  lastEditedAt  DateTime @default(now())
+  version       Int      @default(1)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  // Relations
+  note          Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  createdByUser User     @relation("CreatedByBlock", fields: [createdBy], references: [id], onDelete: Restrict)
+  lastEditedByUser User  @relation("LastEditedByBlock", fields: [lastEditedBy], references: [id], onDelete: Restrict)
+  comments      Comment[]
+
+  @@index([noteId])
+  @@index([createdBy])
+  @@index([lastEditedBy])
+}
+
+// Revision Model
 model Revision {
   id        String   @id @default(uuid())
   noteId    String
-  blocks    String   // JSON stored as string
+  blocks    String   // JSON snapshot
   version   Int
+  createdBy String
   createdAt DateTime @default(now())
 
+  // Relations
   note      Note     @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [createdBy], references: [id], onDelete: Restrict)
 
+  @@index([noteId])
+  @@index([createdBy])
+}
+
+// Comment Model
+model Comment {
+  id          String   @id @default(uuid())
+  noteId      String
+  blockId     String?
+  userId      String
+  workspaceId String
+  content     String
+  resolved    Boolean  @default(false)
+  resolvedBy  String?
+  resolvedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+
+  // Relations
+  note        Note      @relation(fields: [noteId], references: [id], onDelete: Cascade)
+  block       Block?    @relation(fields: [blockId], references: [id], onDelete: SetNull)
+  author      User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  resolver    User?     @relation("ResolvedBy", fields: [resolvedBy], references: [id], onDelete: SetNull)
+
+  @@index([noteId])
+  @@index([blockId])
+  @@index([userId])
+  @@index([workspaceId])
+}
+
+// Activity Log Model
+model Activity {
+  id          String   @id @default(uuid())
+  workspaceId String
+  userId      String
+  noteId      String?
+  blockId     String?
+  actionType  String
+  metadata    String   @default("{}")
+  createdAt   DateTime @default(now())
+
+  // Relations
+  workspace   Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+  user        User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  note        Note?     @relation("ActivityNote", fields: [noteId], references: [id], onDelete: SetNull)
+
+  @@index([workspaceId])
+  @@index([userId])
+  @@index([noteId])
+  @@index([createdAt])
+}
+
+// Session Model (for tracking active connections)
+model Session {
+  id            String   @id @default(uuid())
+  userId        String
+  workspaceId   String
+  noteId        String?
+  socketId      String?
+  cursorPosition Int?
+  connectedAt   DateTime @default(now())
+  disconnectedAt DateTime?
+
+  // Relations
+  user          User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  workspace     Workspace @relation(fields: [workspaceId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([workspaceId])
   @@index([noteId])
 }
 

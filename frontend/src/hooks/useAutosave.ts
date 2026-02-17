@@ -21,59 +21,84 @@ export const useAutosave = () => {
     notes,
   } = useSelector((state: RootState) => state.notes);
 
+  const { currentWorkspaceId } = useSelector(
+    (state: RootState) => state.workspace
+  );
+
   const debouncedSave = useRef(
-    debounce(async (noteId: string, blocks: any[], version: number, title: string) => {
-      dispatch(startSaving());
+    debounce(
+      async (
+        workspaceId: string,
+        noteId: string,
+        blocks: any[],
+        version: number,
+        title: string
+      ) => {
+        dispatch(startSaving());
 
-      try {
-        const data = await updateNote(
-          noteId,
-          title,
-          blocks,
-          version
-        );
+        try {
+          const data = await updateNote(
+            workspaceId,
+            noteId,
+            title,
+            blocks,
+            version
+          );
 
-        dispatch(
-          saveSuccess({
-            version: data.version,
-          })
-        );
-      } catch (err: any) {
-        if (err.message === "CONFLICT" || err.status === 409) {
-          try {
-            const remote = await fetchNote(noteId);
-            dispatch(
-              setConflict({
-                remoteBlocks: remote.blocks,
-                remoteVersion: remote.version,
-              })
-            );
-          } catch (fetchErr) {
-            console.error("Failed to fetch remote note for conflict", fetchErr);
+          dispatch(
+            saveSuccess({
+              version: data.version,
+            })
+          );
+        } catch (err: any) {
+          if (err.message === "CONFLICT" || err.status === 409) {
+            console.log("Conflict detected:", err);
+            try {
+              const remote = await fetchNote(workspaceId, noteId);
+              dispatch(
+                setConflict({
+                  remoteBlocks: remote.blocks,
+                  remoteVersion: remote.version,
+                  lastEditedBy: err.conflict?.lastEditedBy || 'Unknown',
+                  lastEditedAt: err.conflict?.lastEditedAt,
+                })
+              );
+            } catch (fetchErr) {
+              console.error(
+                "Failed to fetch remote note for conflict",
+                fetchErr
+              );
+              dispatch(saveError());
+            }
+          } else {
+            console.error("Save error:", err);
             dispatch(saveError());
           }
-        } else {
-          console.error("Save error:", err);
-          dispatch(saveError());
         }
-      }
-    }, 800)
+      },
+      800
+    )
   ).current;
 
   useEffect(() => {
-    if (!activeNoteId) return;
+    if (!activeNoteId || !currentWorkspaceId) return;
     if (saveStatus.state !== "unsaved") return;
 
     const note = notes[activeNoteId];
     if (!note) return;
 
-    debouncedSave(
-      activeNoteId,
-      localBlocks,
-      version,
-      note.title
-    );
+    debouncedSave(currentWorkspaceId, activeNoteId, localBlocks, version, note.title);
 
     return () => debouncedSave.cancel();
-  }, [localBlocks, saveStatus.state, activeNoteId, version, notes, dispatch, debouncedSave]);
+  }, [
+    localBlocks,
+    saveStatus.state,
+    activeNoteId,
+    currentWorkspaceId,
+    version,
+    notes,
+    dispatch,
+    debouncedSave,
+  ]);
 };
+

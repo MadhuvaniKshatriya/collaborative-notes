@@ -1,9 +1,19 @@
 import { NestFactory } from '@nestjs/core';
+import { ValidationPipe } from '@nestjs/common';
 import { AppModule } from './app.module';
+import { IoAdapter } from '@nestjs/platform-socket.io';
 
 async function bootstrap() {
   const app = await NestFactory.create(AppModule);
 
+  // Global validation pipe
+  app.useGlobalPipes(new ValidationPipe({
+    whitelist: true,
+    forbidNonWhitelisted: true,
+    transform: true,
+  }));
+
+  // CORS configuration
   app.enableCors({
     origin: [
       'http://localhost:5173',
@@ -18,6 +28,17 @@ async function bootstrap() {
     credentials: true,
   });
 
-  await app.listen(5000);
+  // WebSocket configuration
+  app.useWebSocketAdapter(new IoAdapter(app));
+
+  const port = process.env.PORT ? parseInt(process.env.PORT, 10) : 8080;
+  await app.listen(port);
+  console.log(`✓ Server running on http://localhost:${port}`);
+  console.log(`✓ WebSocket available on ws://localhost:${port}/notes`);
 }
-bootstrap();
+
+bootstrap().catch((error) => {
+  console.error('Failed to start server:', error);
+  process.exit(1);
+});
+

@@ -1,5 +1,5 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { PrismaService } from '../prisma/prisma.service';
 import type { Block } from '../notes/types/block.type';
 
 @Injectable()
@@ -17,6 +17,7 @@ export class RevisionsService {
 
     const note = await this.prisma.note.findUnique({
       where: { id: noteId },
+      include: { blocks: true },
     });
 
     if (!note) {
@@ -27,24 +28,45 @@ export class RevisionsService {
     await this.prisma.revision.create({
       data: {
         noteId,
-        blocks: note.blocks,
+        blocks: JSON.stringify(note.blocks || []),
         version: note.version,
+        createdBy: (note.lastEditedBy || note.createdBy || 'system'),
       },
     });
 
-    // Restore the blocks from the revision
-    const restored = await this.prisma.note.update({
+    // Restore the blocks from the revision (delete current blocks and recreate from snapshot)
+    const blocksToRestore: Block[] = JSON.parse(revision.blocks || '[]');
+
+    // Delete existing blocks and recreate
+    await this.prisma.$transaction([
+      this.prisma.block.deleteMany({ where: { noteId } }),
+      this.prisma.block.createMany({
+        data: blocksToRestore.map((b: any) => ({
+          id: b.id,
+          noteId,
+          type: b.type || 'PARAGRAPH',
+          content: b.content || '',
+          order: b.order ?? 0,
+          createdBy: b.createdBy || (note.lastEditedBy || note.createdBy || 'system'),
+          lastEditedBy: b.lastEditedBy || (note.lastEditedBy || note.createdBy || 'system'),
+          version: b.version ?? 1,
+        })),
+      }),
+    ]);
+
+    const restoredNote = await this.prisma.note.update({
       where: { id: noteId },
       data: {
-        blocks: revision.blocks,
         version: note.version + 1,
-        updatedBy: 'system',
+        lastEditedBy: (note.lastEditedBy || note.createdBy || 'system'),
+        lastEditedAt: new Date(),
       },
+      include: { blocks: true },
     });
 
     return {
-      ...restored,
-      blocks: JSON.parse(restored.blocks) as Block[],
+      ...restoredNote,
+      blocks: blocksToRestore,
     };
   }
 

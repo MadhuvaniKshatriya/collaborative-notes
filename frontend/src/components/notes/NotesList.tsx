@@ -7,6 +7,7 @@ import {
   deleteNote,
 } from "../../features/notes/notesSlice";
 import { searchIndex } from "../../features/notes/notesSlice";
+import HighlightedText from "../common/HighlightedText";
 
 export default function NotesList() {
   const dispatch = useDispatch();
@@ -96,7 +97,11 @@ export default function NotesList() {
                         : "text-neutral-900"
                     }`}
                   >
-                    {note.title}
+                    {searchQuery ? (
+                      <HighlightedText text={note.title} searchQuery={searchQuery} />
+                    ) : (
+                      note.title
+                    )}
                   </span>
 
                   <div className="flex gap-1 flex-shrink-0 opacity-0 hover:opacity-100 transition-opacity">
@@ -126,10 +131,17 @@ export default function NotesList() {
                 {/* Preview Snippet */}
                 <div className="text-xs text-neutral-500 mb-3 line-clamp-2">
                   {note.blocks && note.blocks.length > 0
-                    ? note.blocks
-                        .map((b: any) => b.content)
-                        .filter((c: string) => c?.trim())
-                        .join(" • ")
+                    ? (() => {
+                        const preview = note.blocks
+                          .map((b: any) => b.content)
+                          .filter((c: string) => c?.trim())
+                          .join(" • ");
+                        return searchQuery ? (
+                          <HighlightedText text={preview} searchQuery={searchQuery} />
+                        ) : (
+                          preview
+                        );
+                      })()
                     : "No content yet"}
                 </div>
 

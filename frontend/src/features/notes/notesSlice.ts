@@ -23,6 +23,8 @@ interface ConflictData {
   localBlocks: Block[];
   remoteBlocks: Block[];
   remoteVersion: number;
+  lastEditedBy?: string;
+  lastEditedAt?: string;
 }
 
 interface NotesState {
@@ -235,6 +237,8 @@ const notesSlice = createSlice({
       action: PayloadAction<{
         remoteBlocks: Block[];
         remoteVersion: number;
+        lastEditedBy?: string;
+        lastEditedAt?: string;
       }>
     ) {
       state.saveStatus = { state: "conflict" };
@@ -242,6 +246,8 @@ const notesSlice = createSlice({
         localBlocks: state.localBlocks.map((b) => ({ ...b })),
         remoteBlocks: action.payload.remoteBlocks,
         remoteVersion: action.payload.remoteVersion,
+        lastEditedBy: action.payload.lastEditedBy,
+        lastEditedAt: action.payload.lastEditedAt,
       };
     },
 

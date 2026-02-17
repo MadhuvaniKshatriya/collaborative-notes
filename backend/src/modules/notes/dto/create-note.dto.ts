@@ -1,6 +1,11 @@
+import { IsString, IsOptional, IsArray } from 'class-validator';
 import { Block } from '../types/block.type';
 
 export class CreateNoteDto {
+  @IsString()
   title: string;
-  blocks: Block[];
+
+  @IsOptional()
+  @IsArray()
+  blocks?: Block[];
 }
