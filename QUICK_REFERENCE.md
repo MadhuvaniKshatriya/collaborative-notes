@@ -1,6 +1,6 @@
 # Quick Reference Guide
 
-## 🚀 Start Here
+##  Start Here
 
 ### First Time Setup (5 minutes)
 ```bash
@@ -22,7 +22,7 @@ npm run dev
 
 ---
 
-## 📚 Documentation Map
+## Documentation Map
 
 ### For Understanding the Architecture
 → Read: **ARCHITECTURE.md** (205 lines)
@@ -61,7 +61,7 @@ npm run dev
 
 ---
 
-## 🔑 Key Commands
+##  Key Commands
 
 ### Backend
 ```bash
@@ -92,7 +92,7 @@ npm run lint                  # Check code quality
 
 ---
 
-## 🏗️ Project Structure
+##  Project Structure
 
 ### Backend Modules
 ```
@@ -115,7 +115,7 @@ collaboration/ → Presence, comments, activity
 
 ---
 
-## 🔒 Authentication
+##  Authentication
 
 ### User Flows
 
@@ -143,7 +143,7 @@ Header: Authorization: Bearer <token>
 
 ---
 
-## 💾 Database Schema (Quick View)
+##  Database Schema (Quick View)
 
 ### 10 Models
 ```
@@ -175,7 +175,7 @@ Comment                 Activity                Session
 
 ---
 
-## 🌐 API Endpoints (Quick Reference)
+##  API Endpoints (Quick Reference)
 
 ### Auth (No auth required)
 ```
@@ -217,7 +217,7 @@ DELETE /notes/:noteId/comments/:cId
 
 ---
 
-## 📡 WebSocket Events (Socket.IO)
+##  WebSocket Events (Socket.IO)
 
 ### Client → Server
 ```
@@ -247,7 +247,7 @@ conflict          { conflictedBlockId, latestVersion }
 
 ---
 
-## 🔧 Common Tasks
+##  Common Tasks
 
 ### Create a Note
 ```bash
@@ -283,7 +283,7 @@ Frontend: Note reverts to selected version → Activity logged
 
 ---
 
-## 🧪 Testing Quick Checklist
+##  Testing Quick Checklist
 
 ### Essential Tests
 - [ ] Register → Login → Logout flow works
@@ -303,7 +303,7 @@ Frontend: Note reverts to selected version → Activity logged
 
 ---
 
-## 🆘 Troubleshooting
+##  Troubleshooting
 
 ### "Cannot connect to backend"
 ```bash
@@ -320,7 +320,7 @@ netstat -ano | findstr :5000
 ### "WebSocket connection failed"
 ```bash
 # Check Socket.IO server listening
-# Look for: "🚀 WebSocket server listening"
+# Look for: " WebSocket server listening"
 
 # Check frontend .env.local has WS URL
 cat frontend/.env.local
@@ -347,29 +347,29 @@ cat frontend/.env.local
 
 ---
 
-## 📊 Feature Status Dashboard
+##  Feature Status Dashboard
 
 ```
-✅ Authentication          Production Ready
-✅ Workspaces              Production Ready
-✅ Notes & Blocks          Production Ready
-✅ WebSocket               Production Ready
-✅ Presence                Production Ready
-✅ Comments                Production Ready
-✅ Revisions               Production Ready
-✅ Activity Log             Production Ready
-✅ Share Links             Production Ready
-🟡 Comments UI             Component Ready
-🟡 Activity UI             Component Ready
-🟡 E2E Tests              Ready for Implementation
-⏳ Dark Mode               Planned
-⏳ Offline Support         Planned
-⏳ Mobile App              Planned
+  Authentication          Production Ready
+  Workspaces              Production Ready
+  Notes & Blocks          Production Ready
+  WebSocket               Production Ready
+  Presence                Production Ready
+  Comments                Production Ready
+  Revisions               Production Ready
+  Activity Log             Production Ready
+  Share Links             Production Ready
+  Comments UI             Component Ready
+  Activity UI             Component Ready
+  E2E Tests              Ready for Implementation
+  Dark Mode               Planned
+  Offline Support         Planned
+  Mobile App              Planned
 ```
 
 ---
 
-## 📈 Performance Targets
+##  Performance Targets
 
 ```
 Backend Response:       < 100ms (99th percentile)
@@ -380,30 +380,9 @@ Concurrent Users:       5+ simultaneous editors
 Database Size:          Unlimited (with PostgreSQL)
 ```
 
----
 
-## 🔐 Security Checklist
 
-### Development
-- [x] JWT tokens enabled
-- [x] Passwords hashed with bcrypt
-- [x] CORS configured
-- [x] Input validation on all DTOs
-- [x] Role-based access control
-- [x] WebSocket security headers
-
-### Before Production
-- [ ] Change JWT_SECRET
-- [ ] Switch to PostgreSQL
-- [ ] Enable HTTPS
-- [ ] Setup rate limiting
-- [ ] Configure firewall
-- [ ] Enable backup encryption
-- [ ] Setup error logging (Sentry, etc.)
-
----
-
-## 📞 Help & Resources
+##  Help & Resources
 
 ### Documentation Files
 - `ARCHITECTURE.md` - Technical design
@@ -424,7 +403,7 @@ See "🔧 Common Tasks" and "🔧 Common Tasks" sections above
 
 ---
 
-## 🎯 Next Steps
+##  Next Steps
 
 ### To Deploy to Production
 1. Read: `SETUP_AND_DEPLOY.md` → Production section
@@ -449,7 +428,7 @@ See "🔧 Common Tasks" and "🔧 Common Tasks" sections above
 
 ---
 
-## 💡 Pro Tips
+##  Pro Tips
 
 ### Development
 - Use Redux DevTools browser extension for state debugging
@@ -473,7 +452,7 @@ See "🔧 Common Tasks" and "🔧 Common Tasks" sections above
 
 **Last Updated**: January 16, 2025
 **Quick Reference Version**: 1.0
-**Status**: Complete ✅
+**Status**: Complete  
 
 Start with "Start Here" → Follow Documentation Map → Use Quick Reference!
 

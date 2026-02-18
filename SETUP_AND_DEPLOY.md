@@ -231,8 +231,7 @@ Opens interactive UI at http://localhost:5555 showing:
 cd backend
 npx prisma migrate reset
 ```
-
-⚠️ **WARNING**: Deletes all data. Use only in development.
+**WARNING**: Deletes all data. Use only in development.
 
 ### Create Backup
 ```bash
@@ -610,5 +609,5 @@ After successful setup:
 9. **Security Audit** - Review for vulnerabilities before production
 10. **Deploy** - Follow production deployment guide
 
-Happy building! 🚀
+Happy building! 
 

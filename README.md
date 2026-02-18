@@ -2,38 +2,38 @@
 
 A full-stack collaborative notes application with automatic conflict detection, revision history, real-time search, and smooth autosave experience.
 
-## 🎯 Features
+##  Features
 
 ### Core Notes Workflow
-- ✅ Create, edit, delete, and browse notes
-- ✅ Note ownership/edit metadata (updatedBy, updatedAt timestamps)
-- ✅ Full revision history with version tracking
-- ✅ Restore notes to previous revisions
-- ✅ Note list organization with recent-first sorting
-- ✅ Instant access to latest edited note
+-   Create, edit, delete, and browse notes
+-   Note ownership/edit metadata (updatedBy, updatedAt timestamps)
+-   Full revision history with version tracking
+-   Restore notes to previous revisions
+-   Note list organization with recent-first sorting
+-   Instant access to latest edited note
 
 ### Editing Experience
-- ✅ Responsive editor with autosave (800ms debounce)
-- ✅ Clear save state indicators (idle, unsaved, saving, saved, error, conflict)
-- ✅ Prevent accidental data loss on refresh/navigation with unsaved changes
-- ✅ Visual feedback for autosave status
-- ✅ Block-based editing (paragraph, heading, bullet, checkbox, code)
+-   Responsive editor with autosave (800ms debounce)
+-   Clear save state indicators (idle, unsaved, saving, saved, error, conflict)
+-   Prevent accidental data loss on refresh/navigation with unsaved changes
+-   Visual feedback for autosave status
+-   Block-based editing (paragraph, heading, bullet, checkbox, code)
 
 ### Conflict Handling
-- ✅ Version-aware writes with conflict detection
-- ✅ Clear conflict resolution options (accept local/remote)
-- ✅ Conflict context display with local vs remote versions
-- ✅ Prevents silent overwrites after conflicts
-- ✅ Maintains consistent and auditable revision timeline
+-   Version-aware writes with conflict detection
+-   Clear conflict resolution options (accept local/remote)
+-   Conflict context display with local vs remote versions
+-   Prevents silent overwrites after conflicts
+-   Maintains consistent and auditable revision timeline
 
 ### Search & Indexing
-- ✅ Efficient in-memory text search across notes
-- ✅ Incremental search index updates
-- ✅ Real-time search results as you type
-- ✅ Index updates on create/edit/delete/restore paths
-- ✅ Case-insensitive title and content search
+-   Efficient in-memory text search across notes
+-   Incremental search index updates
+-   Real-time search results as you type
+-   Index updates on create/edit/delete/restore paths
+-   Case-insensitive title and content search
 
-## 🏗️ Tech Stack
+##  Tech Stack
 
 ### Frontend
 - **React 18** with TypeScript
@@ -48,12 +48,12 @@ A full-stack collaborative notes application with automatic conflict detection, 
 - **SQLite** for persistent storage
 - **Express** adapter for HTTP
 
-## 📋 Prerequisites
+##  Prerequisites
 
 - Node.js 18+
 - npm or pnpm
 
-## 🚀 Setup & Running
+##  Setup & Running
 
 ### 1. Install Dependencies
 
@@ -92,7 +92,7 @@ npm run dev
 
 Navigate to `http://localhost:5173`
 
-## 🗄️ Database Schema
+##  Database Schema
 
 ### Note Table
 - `id`: UUID primary key
@@ -120,7 +120,7 @@ interface Block {
 }
 ```
 
-## 🔄 Conflict Handling Strategy
+##  Conflict Handling Strategy
 
 ### How It Works
 
@@ -136,7 +136,7 @@ interface Block {
 - Version number is incremented
 - Full history available via RevisionPanel with restore functionality
 
-## 🔍 Search Implementation
+##  Search Implementation
 
 ### Frontend Search Index
 - **Data Structure**: In-memory Map<noteId, searchableText>
@@ -163,7 +163,7 @@ interface Block {
 | GET | /notes/:id/revisions | Get revision history |
 | PATCH | /revisions/:revisionId/restore | Restore revision |
 
-## ⚡ Autosave & Request Sequencing
+##  Autosave & Request Sequencing
 
 ### Debounce Strategy
 - **800ms debounce**: Waits 800ms after last edit before saving
@@ -186,7 +186,7 @@ conflict (special state)
 saved
 ```
 
-## 🧪 Testing Scenarios
+##  Testing Scenarios
 
 ### Multi-Client Conflict Test
 1. Open app in two browser windows
@@ -203,7 +203,7 @@ saved
 4. Click "Restore" on earlier version
 5. Note content reverts, version increments
 
-## 📊 Performance
+##  Performance
 
 ### Optimizations
 - Debounced autosave: Reduces requests during typing
@@ -216,7 +216,7 @@ saved
 - Revisions accumulate (could add cleanup)
 - Large notes might benefit from pagination
 
-## 🔐 Concurrency Guarantees
+##  Concurrency Guarantees
 
 **Strong Guarantees:**
 - Monotonic version numbers
@@ -228,7 +228,7 @@ saved
 - Multiple clients converge after conflicts resolve
 - All clients fetch latest after conflict
 
-## 📝 Architecture Highlights
+##  Architecture Highlights
 
 ### Frontend
 - Redux Toolkit for predictable state management
@@ -244,7 +244,7 @@ saved
 - Full revision audit trail
 - Clear separation of concerns
 
-## 🔗 API Behavior
+##  API Behavior
 
 ### Update Conflict Example
 
@@ -271,7 +271,7 @@ saved
 2. Show conflict modal
 3. User resolves by accepting local or remote
 
-## 🚀 Production Checklist
+##  Production Checklist
 
 - [ ] Add user authentication
 - [ ] Implement WebSocket for real-time collaboration
@@ -284,10 +284,8 @@ saved
 - [ ] Add E2E tests
 - [ ] Deploy to production server
 
-## 📄 License
+##  License
 
 MIT
 
 ---
-
-Built with ❤️ for seamless collaborative note-taking

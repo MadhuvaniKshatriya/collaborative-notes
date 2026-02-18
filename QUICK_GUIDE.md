@@ -34,7 +34,7 @@ Type `/` and select from the menu:
 
 | Icon | State | Meaning |
 |---|---|---|
-| 💾 (pulsing) | Saving... | Data being sent to server |
+|  (pulsing) | Saving... | Data being sent to server |
 | ✓ | Saved | Changes successfully saved |
 | ✕ | Error | Save failed (check connection) |
 | ⚠ | Conflict | Changes conflict with server version |
@@ -85,7 +85,7 @@ Type `/` and select from the menu:
 
 ### Managing Revisions
 1. Open a note
-2. Check **⏰ Revision History** in right panel
+2. Check ** Revision History** in right panel
 3. Click **↺** to restore a previous version
 4. Revisions show version number, date/time, and preview
 5. New revision created automatically
@@ -184,7 +184,7 @@ This is a paragraph with normal text
 
 ## Tips & Tricks
 
-💡 **Pro Tips:**
+ **Pro Tips:**
 
 1. **Quick Block Type Change**
    - Type `/paragraph` while editing another block
