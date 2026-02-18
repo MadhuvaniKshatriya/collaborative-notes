@@ -108,15 +108,8 @@ export class NotesService {
       });
     }
 
-    // Save revision before updating
-    await this.prisma.revision.create({
-      data: {
-        noteId,
-        blocks: JSON.stringify(note.blocks),
-        version: note.version,
-        createdBy: userId,
-      },
-    });
+
+    // (Removed: Save revision before updating)
 
     // Delete existing blocks if new blocks provided
     if (dto.blocks && dto.blocks.length > 0) {
@@ -141,6 +134,7 @@ export class NotesService {
       );
     }
 
+
     // Update note
     const updated = await this.prisma.note.update({
       where: { id: noteId },
@@ -163,6 +157,19 @@ export class NotesService {
         },
       },
     });
+
+    // Create a revision for the new version (after update)
+    // Only create if blocks or title changed
+    if ((dto.blocks && dto.blocks.length > 0) || (dto.title !== undefined && dto.title !== note.title)) {
+      await this.prisma.revision.create({
+        data: {
+          noteId,
+          blocks: JSON.stringify(updated.blocks),
+          version: updated.version,
+          createdBy: userId,
+        },
+      });
+    }
 
     // Log activity
     if (dto.title !== undefined && dto.title !== note.title) {
