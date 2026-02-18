@@ -1,7 +1,3 @@
-/**
- * Highlights matching search terms in text
- * Returns JSX-compatible array of strings and highlighted segments
- */
 export const highlightMatches = (
   text: string,
   searchQuery: string
