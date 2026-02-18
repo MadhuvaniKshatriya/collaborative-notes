@@ -6,6 +6,7 @@ import RevisionPanel from "../notes/RevisionPanel";
 import { initializeNotesThunk } from "../../features/notes/notesThunk";
 import { setActiveNote } from "../../features/notes/notesSlice";
 import type { RootState } from "../../app/store";
+import { useWebSocketConnection } from "../../hooks/useWebSocketConnection";
 
 interface EditorLayoutProps {
   workspaceId: string;
@@ -18,6 +19,8 @@ export default function EditorLayout({
 }: EditorLayoutProps) {
   const dispatch = useDispatch();
   const { activeNoteId } = useSelector((state: RootState) => state.notes);
+
+  useWebSocketConnection(activeNoteId ?? "");
 
   useEffect(() => {
     void dispatch(initializeNotesThunk(workspaceId) as any);
