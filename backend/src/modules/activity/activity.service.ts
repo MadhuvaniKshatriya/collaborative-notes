@@ -1,6 +1,8 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 
+export type ActivityMetadata = Record<string, unknown>;
+
 @Injectable()
 export class ActivityService {
   constructor(private prisma: PrismaService) {}
@@ -12,7 +14,7 @@ export class ActivityService {
       actionType: string;
       noteId?: string;
       blockId?: string;
-      metadata?: any;
+      metadata?: ActivityMetadata;
     },
   ) {
     return this.prisma.activity.create({
@@ -22,16 +24,12 @@ export class ActivityService {
         noteId: activity.noteId,
         blockId: activity.blockId,
         actionType: activity.actionType,
-        metadata: JSON.stringify(activity.metadata || {}),
+        metadata: JSON.stringify(activity.metadata ?? {}),
       },
     });
   }
 
-  async getActivities(
-    workspaceId: string,
-    limit = 50,
-    offset = 0,
-  ) {
+  async getActivities(workspaceId: string, limit = 50, offset = 0) {
     const activities = await this.prisma.activity.findMany({
       where: { workspaceId },
       include: {
@@ -46,15 +44,11 @@ export class ActivityService {
 
     return activities.map((a) => ({
       ...a,
-      metadata: JSON.parse(a.metadata),
+      metadata: JSON.parse(a.metadata) as ActivityMetadata,
     }));
   }
 
-  async getNoteActivities(
-    noteId: string,
-    limit = 50,
-    offset = 0,
-  ) {
+  async getNoteActivities(noteId: string, limit = 50, offset = 0) {
     const activities = await this.prisma.activity.findMany({
       where: { noteId },
       include: {
@@ -69,7 +63,7 @@ export class ActivityService {
 
     return activities.map((a) => ({
       ...a,
-      metadata: JSON.parse(a.metadata),
+      metadata: JSON.parse(a.metadata) as ActivityMetadata,
     }));
   }
 }

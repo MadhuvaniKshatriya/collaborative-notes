@@ -27,9 +27,6 @@ export default function BlockEditor({
     };
 
 
-    /* ============================
-       Slash Detection
-    ============================ */
 
     const handleChange = (value: string) => {
         onChange(value);
@@ -41,37 +38,40 @@ export default function BlockEditor({
         }
     };
 
-    const handleSelect = (type: BlockType) => {
+   const handleSelect = (type: BlockType) => {
+    // Remove trailing slash from current block
+    const cleaned = block.content.replace(/\/$/, "");
+    onChange(cleaned);
+
+    // If paragraph → just convert block type
+    if (type === "heading") {
         onTypeChange(type);
+    } else {
+        // For bullet, checkbox, code → create new block below
+        onEnter(type);
+    }
 
-        // For checkbox, bullet, code: clear the content and start fresh
-        if (type === "checkbox" || type === "bullet" || type === "code") {
-            onChange("");
-        } else {
-            // For other types: remove trailing slash and keep content
-            const updated = block.content.replace(/\/$/, "");
-            onChange(updated);
-        }
+    setShowMenu(false);
 
-        setShowMenu(false);
+    setTimeout(() => {
+        inputRef.current?.focus();
+    }, 0);
+};
 
-        setTimeout(() => {
-            inputRef.current?.focus();
-        }, 0);
-        };
 
 
     const handleKeyDown = (e: React.KeyboardEvent) => {
-        // Backspace on empty checkbox → convert to paragraph
-        if (
-        e.key === "Backspace" &&
-        block.type === "checkbox" &&
-        block.content.trim() === ""
-        ) {
-        e.preventDefault();
-        onTypeChange("paragraph");
-        return;
-        }
+        // Backspace on empty bullet or checkbox → convert to paragraph
+            if (
+            e.key === "Backspace" &&
+            (block.type === "checkbox" || block.type === "bullet" || block.type === "code") &&
+            block.content.trim() === ""
+            ) {
+            e.preventDefault();
+            onTypeChange("paragraph");
+            return;
+            }
+
 
         // SHIFT+ENTER → create paragraph block
         if (e.key === "Enter" && e.shiftKey) {
@@ -87,6 +87,12 @@ export default function BlockEditor({
             return;
         }
 
+        if (e.key === "Enter" && block.type === "bullet") {
+            e.preventDefault();
+            onEnter("bullet");
+            return;
+        }
+
         // ENTER inside paragraph → allow newline
         if (e.key === "Enter" && block.type === "paragraph") {
             return; // default newline
@@ -99,9 +105,6 @@ export default function BlockEditor({
 
 
 
-    /* ============================
-       Render Different Block Types
-    ============================ */
 
     let element;
 
