@@ -39,7 +39,7 @@ export default function EditorLayout({
       </div>
 
       <div className="flex-1 flex flex-col overflow-hidden">
-        <NoteEditor />
+        <NoteEditor workspaceId={workspaceId} />
       </div>
 
       <div className="w-80 border-l border-neutral-200 flex flex-col shadow-sm">

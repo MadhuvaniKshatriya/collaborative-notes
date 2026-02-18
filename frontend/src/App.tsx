@@ -14,6 +14,7 @@ import EditorLayout from './components/layout/EditorLayout';
 import ConflictModal from './components/notes/ConflictModal';
 import WorkspacesPage from './pages/WorkspacesPage';
 import NotesEditorPage from './pages/NotesEditorPage';
+import SharedNotePage from './pages/SharedNotePage';
 
 function AppContent() {
   const dispatch = useDispatch<AppDispatch>();
@@ -51,7 +52,7 @@ function AppContent() {
         />
 
         {/* Shared note (public) */}
-        <Route path="/share/:shareToken" element={<div>Shared Note View</div>} />
+        <Route path="/share/:token" element={<SharedNotePage />} />
 
         {/* Default redirect */}
         <Route path="/" element={<Navigate to="/workspaces" replace />} />

@@ -6,6 +6,8 @@ import { NotesModule } from './modules/notes/notes.module';
 import { ActivityModule } from './modules/activity/activity.module';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
+import { NotesService } from './modules/notes/notes.service';
+import { CollaborationGateway } from './modules/collaboration/collaboration.gateway';
 
 @Module({
   imports: [
@@ -19,6 +21,6 @@ import { AppService } from './app.service';
     ActivityModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [AppService, NotesService, CollaborationGateway],
 })
 export class AppModule {}

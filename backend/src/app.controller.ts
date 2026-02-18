@@ -1,5 +1,6 @@
-import { Controller, Get } from '@nestjs/common';
+import { Controller, Get, Param } from '@nestjs/common';
 import { AppService } from './app.service';
+import { NotesService } from './modules/notes/notes.service';
 
 type HealthResponse = {
   status: 'ok' | 'error';
@@ -9,7 +10,10 @@ type HealthResponse = {
 
 @Controller()
 export class AppController {
-  constructor(private readonly appService: AppService) {}
+  constructor(
+    private readonly appService: AppService,
+    private readonly notesService: NotesService,
+  ) {}
 
   @Get()
   getHello(): string {
@@ -23,5 +27,10 @@ export class AppController {
       uptime: process.uptime(),
       timestamp: new Date().toISOString(),
     };
+  }
+
+  @Get('share/:token')
+  async getSharedNote(@Param('token') token: string) {
+    return this.notesService.getSharedNote(token);
   }
 }

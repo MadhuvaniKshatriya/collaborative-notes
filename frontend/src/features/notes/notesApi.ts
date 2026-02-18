@@ -120,3 +120,17 @@ export const getSharedNote = async (shareToken: string) => {
   if (!res.ok) throw new Error("Failed to fetch shared note");
   return res.json();
 };
+
+export const saveNote = async (
+  workspaceId: string,
+  note: any
+) => {
+  return updateNote(
+    workspaceId,
+    note.id,
+    note.title,
+    note.blocks,
+    note.version,
+    note.updatedBy || "user"
+  );
+};

@@ -14,11 +14,19 @@ import BlockEditor from "./BlockEditor";
 import { useBeforeUnloadGuard } from "../../hooks/useBeforeUnloadGuard";
 import SaveIndicator from "./SaveIndicator";
 import PresenceBar from "../layout/PresenceBar";
+import ShareModal from "./ShareModal";
 
-export default function NoteEditor() {
+interface NoteEditorProps {
+  workspaceId: string;
+}
+
+export default function NoteEditor({ workspaceId }: NoteEditorProps) {
   const dispatch = useDispatch();
   const [editingTitle, setEditingTitle] = useState(false);
   const [titleValue, setTitleValue] = useState("");
+  const [shareModalOpen, setShareModalOpen] = useState(false);
+  const [shareToken, setShareToken] = useState<string | null>(null);
+  const [isSharing, setIsSharing] = useState(false);
 
   const {
     activeNoteId,
@@ -76,6 +84,30 @@ export default function NoteEditor() {
     setEditingTitle(false);
   };
 
+  const handleShare = async () => {
+    if (!activeNoteId) return;
+    if (!workspaceId) return;
+    setIsSharing(true);
+    try {
+      const response = await fetch(
+        `http://localhost:5000/workspaces/${workspaceId}/notes/${activeNoteId}/share`,
+        {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+        }
+      );
+
+      if (response.ok) {
+        const data = await response.json();
+        setShareToken(data.shareToken);
+        setShareModalOpen(true);
+      }
+    } catch (error) {
+      console.error("Failed to create share link:", error);
+    } finally {
+      setIsSharing(false);
+    }
+  };
 
   return (
     <div className="flex-1 flex flex-col bg-white min-h-0">
@@ -135,8 +167,20 @@ export default function NoteEditor() {
             <PresenceBar />
           </div>
 
-          {/* Save Status */}
-          <SaveIndicator />
+          <div className="flex items-center gap-4">
+            {/* Share Button */}
+            <button
+              onClick={handleShare}
+              disabled={isSharing}
+              className="px-3 py-1.5 text-sm font-medium text-blue-600 hover:bg-blue-50 rounded transition-colors disabled:opacity-50"
+              title="Share this note"
+            >
+              {isSharing ? "Sharing..." : "🔗 Share"}
+            </button>
+
+            {/* Save Status */}
+            <SaveIndicator />
+          </div>
         </div>
       </div>
 
@@ -184,6 +228,15 @@ export default function NoteEditor() {
           ))}
         </div>
       </div>
+
+      {/* Share Modal */}
+      {shareToken && (
+        <ShareModal
+          isOpen={shareModalOpen}
+          shareUrl={shareToken}
+          onClose={() => setShareModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

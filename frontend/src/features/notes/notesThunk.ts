@@ -4,6 +4,7 @@ import {
   fetchNotes,
   restoreRevision,
   searchNotes,
+  saveNote,
 } from "./notesApi";
 import {
   hydrateNoteFromServer,
@@ -106,6 +107,26 @@ export const searchNotesThunk = createAsyncThunk<
       return [];
     }
     return searchNotes(workspaceId, query);
+  }
+);
+
+export const saveNoteThunk = createAsyncThunk<
+  any,
+  void,
+  { state: RootState }
+>(
+  "notes/saveNote",
+  async (_, { dispatch, getState }) => {
+    const state = getState();
+    const workspaceId = state.workspace.currentWorkspaceId;
+    const noteId = state.notes.activeNoteId;
+    const note = state.notes.notes[noteId ?? ""];
+    if (!workspaceId || !noteId || !note) {
+      throw new Error("Missing workspace or note");
+    }
+    const savedNote = await saveNote(workspaceId, note);
+    dispatch(hydrateNoteFromServer(savedNote));
+    return savedNote;
   }
 );
 
